@@ -40,7 +40,7 @@ import MessLog
 SMS_URL = "https://us.sms.api.sinch.com/xms/v1/"
 API_KEY = ""
 FROM_NUMBER = ""
-SINCH_VER = "1.1"
+SINCH_VER = "1.2"
 SMS_LOG = MessLog.MessLog(dirPrepend = '', filename = 'SMSGUI')
 
 # default status message
@@ -63,32 +63,33 @@ You will need an API Key from sinch.com \
 in order to utilize the program."
 
 class SinchGUI(tk.Frame):
-    """Create a GUI.  Inherits/Extends tkinter tk.Frame
-    """
+    '''Create Sinch SMS GUI by extending tk.Frame'''
     def __init__(self, master = None):
-        """Constructor to build GUI window
+        '''Constructor to build GUI window
 
         :param master: GUI window root
         :type master: tk.tk() object
         :returns: none
-        """
-
+        '''
+        # Call init from tk.Frame
         super().__init__(master)
+        # Create GUI root and pack
         self.master = master
         self.pack()
+        # instance variables
         self.SMS_URL = SMS_URL
         self.API_KEY = API_KEY
         self.FROM_NUMBER = FROM_NUMBER
         self.number_list = ['       Pick From Dropdown       ']
-
+        # Populate number_list by finding and loading .num files
         for list_files in listdir('.'):
             poss_nums = list_files.split('.num')
             if len(poss_nums) == 2:
                 self.number_list.append(poss_nums[0])
-
+        # Variables for dropdown list
         self.number_list_var = tk.StringVar(self.master)
         self.number_list_var.set(self.number_list[0])
-
+        # Create all GUI elements
         self.create_menu()
         self.create_api()
         self.create_sms_url()
@@ -101,6 +102,8 @@ class SinchGUI(tk.Frame):
         self._update_status_line(status)
     
     def create_menu(self):
+        ''' Creates the top menu
+        '''
         menu = tk.Menu(self.master)
 
         aboutMenu = tk.Menu(menu)
@@ -114,17 +117,18 @@ class SinchGUI(tk.Frame):
         self.master.config(menu=menu)
 
     def _exit_app(self):
+        ''' Exits GUI
+        '''
         self.master.quit()
 
     def _display_about(self):
+        ''' Show messagebox with help message
+        '''
         tk.messagebox.showinfo("About", helpmessage)
 
-    def tester(self):
-        print("test command")
-
     def create_api(self):
-        """Create API Key label and entry field
-        """
+        '''Create API Key label and entry field
+        '''
         self.api_label = tk.Label(text = "Enter API Key")
         self.api_entry = tk.Entry(width = 50)
         self.api_label.pack()
@@ -132,8 +136,8 @@ class SinchGUI(tk.Frame):
         self.api_entry.insert(0, self.API_KEY)
     
     def create_sms_url(self):
-        """Create SMS URL label and entry field
-        """
+        '''Create SMS URL label and entry field
+        '''
         self.sms_url_label = tk.Label(text = "Enter SMS URL")
         self.sms_url_entry = tk.Entry(width = 50)
         self.sms_url_label.pack()
@@ -141,8 +145,8 @@ class SinchGUI(tk.Frame):
         self.sms_url_entry.insert(0, self.SMS_URL)
     
     def create_from_number(self):
-        """Create From Number label and entry field
-        """
+        '''Create From Number label and entry field
+        '''
         self.from_num_label = tk.Label(text = "Enter From Number")
         self.from_num_entry = tk.Entry(width = 50)
         self.from_num_label.pack()
@@ -150,18 +154,20 @@ class SinchGUI(tk.Frame):
         self.from_num_entry.insert(0, self.FROM_NUMBER)
     
     def _load_numbers(self, choice):
-        """Load numbers from number list into to box
-        """
+        '''Load numbers from number list into to box
+        '''
         choice = self.number_list_var.get()
+        # If No selection is made do nothing
         if choice == '       Pick From Dropdown       ':
             pass
+        # Clear the to_number textbox then fill with entries from .num file
         else:
             self.to_numbers_entry.delete("1.0", tk.END)
             add_numbers_file(choice + ".num")
 
     def create_number_menu(self):
-        """Create Drop down list for loading numbers
-        """
+        '''Create Drop down list for loading numbers
+        '''
         number_list = self.number_list
         self.number_menu_label = tk.Label(text = "Select to Load Numbers From Lists")
         self.number_menu = tk.OptionMenu(self.master, self.number_list_var, *number_list, command=self._load_numbers)
@@ -169,8 +175,8 @@ class SinchGUI(tk.Frame):
         self.number_menu.pack()
 
     def create_to_numbers(self):
-        """Create To numbers label and entry text box
-        """
+        '''Create To numbers label and entry text box
+        '''
         self.to_numbers_frame = tk.Frame(width = 336, height = 100)
         self.to_numbers_frame.pack()
         self.to_numbers_label = tk.Label(master = self.to_numbers_frame, text = "Enter To Number(s)")
@@ -182,8 +188,8 @@ class SinchGUI(tk.Frame):
         self.to_numbers_entry.pack(side = "right")
     
     def create_text_message(self):
-        """Create text message label and entry text box
-        """
+        '''Create text message label and entry text box
+        '''
         self.text_message_frame = tk.Frame(width = 336, height = 50)
         self.text_message_frame.pack()
         self.text_message_label = tk.Label(master = self.text_message_frame, text = "Enter Text Message to Send - 140 character limit")
@@ -195,14 +201,14 @@ class SinchGUI(tk.Frame):
         self.text_message_entry.pack(side = "right")
     
     def create_run_button(self):
-        """Create run button
-        """
+        '''Create run button
+        '''
         self.run_button = tk.Button(text = "Send SMS", command = self.run_button)
         self.run_button.pack()
     
     def create_status_line(self):
-        """Create status line label and entry field
-        """
+        '''Create status line label and entry field
+        '''
         self.status_line = tk.Entry(width = 50, state = 'disabled')
         self.status_label = tk.Label(text = "Status:")
         self.status_space = tk.Label(text = "")
@@ -211,11 +217,11 @@ class SinchGUI(tk.Frame):
         self.status_label.pack(side = "bottom")
     
     def _update_status_line(self, status = None):
-        """Method to update the status line
+        '''Method to update the status line
         :param status: string to update the status line with
         :type status: str
         :returns: none
-        """
+        '''
         if status == None:
             pass
         else:
@@ -225,36 +231,36 @@ class SinchGUI(tk.Frame):
             self.status_line.config(state = 'readonly')
     
     def _copy(self, event=None):
-        """Execute copy when <ctrl-c> is pressed in a window
+        '''Execute copy when <ctrl-c> is pressed in a window
         :param event: listener event
         :type event: str listener
         :returns: none
-        """
+        '''
         self.clipboard_clear()
         text = self.get("sel.first", "sel.last")
         self.clipboard_append(text)
     
     def _cut(self, event):
-        """Execute cut when <ctrl-x> is pressed in a window
+        '''Execute cut when <ctrl-x> is pressed in a window
         :param event: listener event
         :type event: str listener
         :returns: none
-        """
+        '''
         self.copy()
         self.delete("sel.first", "sel.last")
 
     def _paste(self, event):
-        """Execute paste when <ctrl-v> is pressed in a window
+        '''Execute paste when <ctrl-v> is pressed in a window
         :param event: listener event
         :type event: str listener
         :returns: none
-        """
+        '''
         text = self.selection_get(selection='CLIPBOARD')
         self.insert('insert', text)
     
     def run_button(self):
-        """Method that executes when run button is pressed
-        """
+        '''Method that executes when run button is pressed
+        '''
         global SMS_LOG
         numSentMsg = 0
         self.run_button.config(state = 'disabled')
@@ -321,6 +327,10 @@ class SinchGUI(tk.Frame):
         self.run_button.config(state = 'normal')
     
 def readConfigFile(configOption):
+    '''Load items from config file into global variables
+        :param configOption: string with line from config file
+        :returns: none
+    '''
     if "api-key=" in configOption:
         global API_KEY
         API_KEY = configOption[8:]
@@ -332,6 +342,10 @@ def readConfigFile(configOption):
         FROM_NUMBER = configOption[9:]
 
 def add_numbers_file(num_file_in):
+    '''Adds numbers from file into to_numbers text box
+        :param num_file_in: file to get numbers from
+        :return: none
+    '''
     try:
         with open(num_file_in) as numbers_file:
             for line in numbers_file.readlines():
@@ -343,6 +357,7 @@ def add_numbers_file(num_file_in):
         SMS_LOG.writeLogFile("Error reading NUMBERS_IN file: " + str(e) + "\r\n")
         exit()
 
+# Begin Main execution
 if __name__ == "__main__":
     SMS_CONFIG = "sinch_sms.conf"
     NUMBERS_IN = "numbers.txt"
@@ -389,6 +404,7 @@ if __name__ == "__main__":
     SinchApp.master.minsize(336, 525)
     SinchApp.master.maxsize(336, 525)
     
+    # Add default numbers file
     add_numbers_file(NUMBERS_IN)
     
     # Execute GUI loop
